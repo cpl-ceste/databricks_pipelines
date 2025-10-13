@@ -1,0 +1,41 @@
+name: Deploy Databricks Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ceste_1
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install databricks-cli yq
+      - name: List repo files
+        run: |
+          ls -R
+      - name: Convert YAML to JSON
+        run: |
+          yq -j . Sesion_3/workflow/job_airline_pipeline.yaml > Sesion_3/workflow/job_airline_pipeline.json 
+      - name: Extract job settings for Databricks
+        run: |
+          jq '.resources.jobs.airline_pipeline' Sesion_3/workflow/job_airline_pipeline.json > Sesion_3/workflow/job_airline_pipeline_fixed.json 
+      - name: Show generated JSON (debug)
+        run: |
+          cat Sesion_3/workflow/job_airline_pipeline_fixed.json
+
+      - name: Deploy workflow to Databricks
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          databricks jobs reset --job-id 715960207669218 --json-file Sesion_3/workflow/job_airline_pipeline_fixed.json
