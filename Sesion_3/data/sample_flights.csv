@@ -1,0 +1,5 @@
+flight_id,origin,dest,date,delay
+1,JFK,LAX,2023-01-01,5
+2,LAX,JFK,2023-01-02,-3
+3,JFK,ORD,2023-01-03,10
+4,ORD,LAX,2023-01-04,0

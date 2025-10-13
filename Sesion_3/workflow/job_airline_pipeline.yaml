@@ -1,0 +1,57 @@
+resources:
+  jobs:
+    airline_pipeline:
+      name: airline_pipeline
+      schedule:
+        quartz_cron_expression: 0 8 * * * ?
+        timezone_id: UTC
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: setup
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/00_setup.py
+          environment_key: Default
+        - task_key: ingest_airports
+          depends_on:
+            - task_key: setup
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/10_bronze_ingest_flights.py
+          environment_key: Default
+        - task_key: ingest_flights
+          depends_on:
+            - task_key: setup
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/11_bronze_ingest_airports.py
+          environment_key: Default
+        - task_key: silver_transform
+          depends_on:
+            - task_key: ingest_flights
+            - task_key: ingest_airports
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/20_silver_transform.py
+          environment_key: Default
+        - task_key: gold_analytics
+          depends_on:
+            - task_key: silver_transform
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/30_gold_analytics.py
+          environment_key: Default
+        - task_key: quality
+          depends_on:
+            - task_key: gold_analytics
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/40_quality_and_metrics.py
+          environment_key: Default
+        - task_key: optimization_demo
+          depends_on:
+            - task_key: quality
+          spark_python_task:
+            python_file: /Workspace/Users/psanzc@hotmail.com/optimizacion_databricks/Sesion_3/src/50_performance_optimization.py
+          environment_key: Default
+      queue:
+        enabled: true
+      environments:
+        - environment_key: Default
+          spec:
+            client: "3"
+      performance_target: PERFORMANCE_OPTIMIZED

@@ -1,0 +1,10 @@
+{
+  "catalog": "airline_demo",
+  "schemas": {
+    "bronze": "bronze",
+    "silver": "silver",
+    "gold": "gold"
+  },
+  "data_path": "dbfs:/datasets/airline_demo/",
+  "environment": "prod"
+}
